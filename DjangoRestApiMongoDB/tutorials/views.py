@@ -4,11 +4,11 @@ from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser 
 from rest_framework import status
  
-from tutorials.models import Tutorial
-from tutorials.serializers import TutorialSerializer
+from tutorials.models import Tutorial, Teacher
+from tutorials.serializers import TutorialSerializer, TeacherSerializer
 from rest_framework.decorators import api_view
 
-
+# API Requests for Tutorial objects
 @api_view(['GET', 'POST', 'DELETE'])
 def tutorial_list(request):
     if request.method == 'GET':
@@ -67,3 +67,24 @@ def tutorial_list_published(request):
         tutorials_serializer = TutorialSerializer(tutorials, many=True)
         return JsonResponse(tutorials_serializer.data, safe=False)
     
+
+
+#API Requests for Teacher 
+@api_view(['GET', 'POST', 'DELETE'])
+def teacher_list(request):
+    if request.method == 'GET':
+        teachers = Teacher.objects.all()
+        
+        name = request.GET.get('name', None)
+        if name is not None:
+            teachers = teachers.filter(name__icontains=name)
+        
+        teacher_serializer = TeacherSerializer(teachers, many=True )
+        return JsonResponse(teacher_serializer.data, safe=False)
+
+    elif request.method == 'DELETE':
+        count = Teacher.objects.all().delete()
+        return JsonResponse({'message': '{} Teachers accounts are deleted successfully!'.format(count[0])}, status=status.HTTP_204_NO_CONTENT)    
+    
+ 
+ 
